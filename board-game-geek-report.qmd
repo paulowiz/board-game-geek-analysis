@@ -1,0 +1,45 @@
+---
+title: "Board Game Geek Analysis"
+author: "Paulo Henrique da Silva Mota"
+format: pdf
+editor: visual
+---
+
+### **Introduction to the Board Game Industry**
+
+#### **Market Overview**
+
+Briefly introduce the board game industry, including its growth, major players, and trends.
+
+#### **Performance Measures**
+
+Define what constitutes success in the board game industry. Common measures include: Sales Revenue: Directly relates to making money. Ratings/Reviews: High ratings often correlate with better sales.
+
+#### **Data Description**
+
+Data Source: Explain the data source (BoardGameGeek data from TidyTuesday) and what it contains. Variables Overview: Provide a summary of the key variables in the dataset. These might include: Game Rating Number of Reviews Year of Release Category/Genre of Game Play Time Number of Players Designer/Publisher
+
+### **Performance Measures Analysis**
+
+Sales Revenue vs. Ratings: Discuss how ratings and reviews might impact sales revenue. Variable Selection: Identify and describe three to four key variables that will inform your game design strategy: Game Rating: Higher ratings usually indicate better market acceptance. Number of Reviews: More reviews can suggest higher sales and popularity. Category/Genre: Certain genres may perform better financially. Play Time/Number of Players: These factors can influence a game's appeal.
+
+#### **Control Variables**
+
+Important Control Variables: Identify variables that, while not directly related to strategy, need to be controlled for: Year of Release: Newer games may have different market dynamics. Designer/Publisher Reputation: Established names might skew results. Marketing Spend: More marketing can lead to better sales.
+
+#### **Visualizations**
+
+Table: Create a table summarizing the distribution of key variables (e.g., average ratings, number of reviews by genre). Figure: A histogram or bar chart showing the frequency distribution of game ratings or sales.
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
