@@ -30,16 +30,13 @@ Columns Ratings Target : num, id, name, year, rank, average , Bayes_average, use
 
 Columns to drop : url
 
-```{}
-```
-
 ```{r}
 head(details) 
 ```
 
 Columns to drop : description, boardgamefamily, boardgameexpansion, boardgameimplementation,
 
-Not sure: boardgameartist, boardgamepublisher,
+Not sure: boardgameartist, boardgamepublisher
 
 Columns to clean: arrays -\> boardgamescategory, boardgamemecchanic, boardgamedesgin
 
@@ -49,21 +46,13 @@ dim(ratings)
 ```
 
 ```{r}
-```
-
-```{r}tuition_income %>%}
-    dplyr::select(-c(net_cost, income_lvl)) %>%
-    dplyr::group_by(name, year) %>%
-    dplyr::summarise(avg_per_year = mean(total_price, na.rm = TRUE)) %>%
-    dplyr::ungroup() %>%
-    dplyr::arrange(name, year) -> temp_r
+colnames(ratings)
 
 ```
 
 ```{r}
-dim(details)
+colnames(details)
 
 ```
 
-```{}
-```
+

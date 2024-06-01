@@ -1,45 +1,123 @@
 ---
-title: "Board Game Geek Analysis"
+title: "Designing 'Academia: The Board Game' – A Data-Driven Strategy for Success"
 author: "Paulo Henrique da Silva Mota"
-format: pdf
+format: 
+    pdf:
+      toc: true
+      toc-depth: 3
+      toc-title: Summary
+   
+header-includes:
+  - \usepackage{fancyhdr}
+  - \usepackage{graphicx}
+  - \usepackage{eso-pic}
+  - \usepackage{tikz}
+  - \AtBeginDocument{\thispagestyle{empty}\begin{tikzpicture}[remember picture,overlay]
+          \node at (current page.south) [yshift=6cm] {\includegraphics[width=0.25\paperwidth,height=0.25\paperheight,keepaspectratio]{logo.png}};
+          \node at (current page.center) [yshift=5cm] [anchor=north,yshift=-2cm] {\Huge\textbf{Behind the Lyrics}};
+          \node at (current page.center) [yshift=3cm] [anchor=north,yshift=-2cm] {\huge\textbf{Unveiling Singer and User Insights on Music to Scrape}};
+          \node at (current page.south) [yshift=5cm] [anchor=north,yshift=-2cm] {\normalsize\textbf{June 2024}};
+          \end{tikzpicture}\clearpage}
 editor: visual
 ---
 
-### **Introduction to the Board Game Industry**
-
-#### **Market Overview**
-
-Briefly introduce the board game industry, including its growth, major players, and trends.
-
-#### **Performance Measures**
-
-Define what constitutes success in the board game industry. Common measures include: Sales Revenue: Directly relates to making money. Ratings/Reviews: High ratings often correlate with better sales.
-
-#### **Data Description**
-
-Data Source: Explain the data source (BoardGameGeek data from TidyTuesday) and what it contains. Variables Overview: Provide a summary of the key variables in the dataset. These might include: Game Rating Number of Reviews Year of Release Category/Genre of Game Play Time Number of Players Designer/Publisher
-
-### **Performance Measures Analysis**
-
-Sales Revenue vs. Ratings: Discuss how ratings and reviews might impact sales revenue. Variable Selection: Identify and describe three to four key variables that will inform your game design strategy: Game Rating: Higher ratings usually indicate better market acceptance. Number of Reviews: More reviews can suggest higher sales and popularity. Category/Genre: Certain genres may perform better financially. Play Time/Number of Players: These factors can influence a game's appeal.
-
-#### **Control Variables**
-
-Important Control Variables: Identify variables that, while not directly related to strategy, need to be controlled for: Year of Release: Newer games may have different market dynamics. Designer/Publisher Reputation: Established names might skew results. Marketing Spend: More marketing can lead to better sales.
-
-#### **Visualizations**
-
-Table: Create a table summarizing the distribution of key variables (e.g., average ratings, number of reviews by genre). Figure: A histogram or bar chart showing the frequency distribution of game ratings or sales.
-
-```{r}
-1 + 1
-```
-
-You can add options to executable code like this
 
 ```{r}
 #| echo: false
-2 * 2
+#| warning: false
+# Load the required library
+library(httr)
+library(dplyr)
+
+# Specify the URL of the API
+api_url <- "https://api.music-to-scrape.org"
+
+# Remember, the documentation is available at https://api.music-to-scrape.org/docs!
+
+# From that API, we can pick an endpoint - think of it as a website, but then 
+# for computers to read!
+
+# Here, we extract the weekly top 15 songs.
+
+# Send an HTTP GET request to the API
+response <- GET(paste0(api_url, '/charts/top-tracks?week=42&year=2023'))
+
+# Check if the request was successful
+if (response$status_code == 200) {
+    # Parse the JSON response
+    data <- content(response, "parsed")
+    
+    # Compile data in a table and select columns
+    song_data <- data$chart %>% bind_rows() %>% select(name, artist)
+    
+} else {
+    cat("Failed to retrieve data. Status code:", response$status_code, "\n")
+    song_data <- NULL
+}
+                
+knitr::kable(head(song_data,n=4),
+             format = "html",
+             caption = "Most popular tracks on the third week of October in 2023")
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+# Introduction
+
+## Background
+Provide an overview of your journey in academia and your decision to transition to board game design. Introduce the concept of "Academia: The Board Game" and the main goal of creating a profitable game.
+
+## Objectives
+Outline the main objectives of the report:
+1. Prepare and describe the data.
+2. Analyze the important game design variables.
+3. Lay out a strategy recommendation.
+
+# Data Preparation and Description
+
+## Data Source
+Describe the BoardGameGeeks data obtained from TidyTuesday. Mention the types of information available (e.g., game ratings, mechanics, themes, user reviews).
+
+## Data Preparation
+Detail the steps taken to clean and preprocess the data in R. Include code snippets where appropriate.
+
+## Performance Measures
+Discuss two performance measures (e.g., average rating, number of ratings) and their relevance to the goal of making money.
+
+## Key Variables
+Identify and describe three to four key variables that could inform game design actions (e.g., mechanics, play time, number of players).
+
+## Control Variables
+Identify variables that might affect game performance but are not part of the strategy options (e.g., year published, game category).
+
+## Data Summary
+Provide a table and a figure summarizing the frequency and distributions of relevant variables.
+
+# Data Analysis
+
+## Relationships with Performance Measures
+Analyze how key design variables relate to performance measures using appropriate statistical methods.
+
+## Model Evaluation
+Discuss the appropriateness of the model based on R output. Explore other methods to test the relationships (e.g., ANOVA, correlation analysis).
+
+## Causality Discussion
+Examine the potential for causal inference in the dataset. Discuss limitations and assumptions.
+
+## Results Presentation
+Provide a single result table and a figure to present the analysis findings.
+
+# Strategy Recommendation
+Strategic Insights
+Build on the analysis to provide strategic recommendations for the game design.
+
+## Limitations
+Discuss the limitations of the analysis and recommendations.
+
+## Additional Data and Analysis
+Suggest additional data that could further inform the strategy and potential analyses that could be conducted with it.
+
+## Conclusion
+Summarize the key findings and strategic recommendations. Reinforce the goal of creating a successful and profitable board game.
+
+# References
+List all sources and references used in the report.
+
