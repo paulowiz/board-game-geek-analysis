@@ -43,6 +43,7 @@ Columns to clean: arrays -\> boardgamescategory, boardgamemecchanic, boardgamede
 ```{r}
 dim(ratings)
 
+
 ```
 
 ```{r}

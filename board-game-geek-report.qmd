@@ -1,5 +1,5 @@
 ---
-title: "Designing 'Academia: The Board Game' – A Data-Driven Strategy for Success"
+title: "Academia to Board Game Brilliance - A Data-Driven Strategy for 'Academia: The Board Game"
 author: "Paulo Henrique da Silva Mota"
 format: 
     pdf:
@@ -14,67 +14,116 @@ header-includes:
   - \usepackage{tikz}
   - \AtBeginDocument{\thispagestyle{empty}\begin{tikzpicture}[remember picture,overlay]
           \node at (current page.south) [yshift=6cm] {\includegraphics[width=0.25\paperwidth,height=0.25\paperheight,keepaspectratio]{logo.png}};
-          \node at (current page.center) [yshift=5cm] [anchor=north,yshift=-2cm] {\Huge\textbf{Behind the Lyrics}};
-          \node at (current page.center) [yshift=3cm] [anchor=north,yshift=-2cm] {\huge\textbf{Unveiling Singer and User Insights on Music to Scrape}};
+          \node at (current page.center) [yshift=5cm] [anchor=north,yshift=-2cm] {\Huge\textbf{Academia to Board Game Brilliance}};
+          \node at (current page.center) [yshift=3cm] [anchor=north,yshift=-2cm] {\huge\textbf{A Data-Driven Strategy for Academia The Board Game}};
           \node at (current page.south) [yshift=5cm] [anchor=north,yshift=-2cm] {\normalsize\textbf{June 2024}};
           \end{tikzpicture}\clearpage}
 editor: visual
 ---
 
-
 ```{r}
 #| echo: false
 #| warning: false
+library(tidytuesdayR)
 # Load the required library
 library(httr)
 library(dplyr)
 
-# Specify the URL of the API
-api_url <- "https://api.music-to-scrape.org"
-
-# Remember, the documentation is available at https://api.music-to-scrape.org/docs!
-
-# From that API, we can pick an endpoint - think of it as a website, but then 
-# for computers to read!
-
-# Here, we extract the weekly top 15 songs.
-
-# Send an HTTP GET request to the API
-response <- GET(paste0(api_url, '/charts/top-tracks?week=42&year=2023'))
-
-# Check if the request was successful
-if (response$status_code == 200) {
-    # Parse the JSON response
-    data <- content(response, "parsed")
+# Check if the CSV files exist
+if (!file.exists("ratings.csv") | !file.exists("details.csv")) {
+  # Load the tidytuesdayR library
+  library(tidytuesdayR)
+  
+  # Load the datasets for the specified date
+  tuesdata <- tidytuesdayR::tt_load('2022-01-25')
+  
+  # Assign the datasets to variables
+  ratings <- tuesdata$ratings
+  details <- tuesdata$details
+  
+  # Check if the data frames are empty
+  if (nrow(ratings) == 0 | nrow(details) == 0) {
+    cat("Error: One or both datasets are empty. Cannot export.\n")
+  } else {
+    # Export the datasets as CSV files
+    write.csv(ratings, "ratings.csv", row.names = FALSE)
+    write.csv(details, "details.csv", row.names = FALSE)
     
-    # Compile data in a table and select columns
-    song_data <- data$chart %>% bind_rows() %>% select(name, artist)
-    
+    cat("Datasets have been loaded from tidytuesdayR and exported as 'ratings.csv' and 'details.csv'.\n\n")
+  }
 } else {
-    cat("Failed to retrieve data. Status code:", response$status_code, "\n")
-    song_data <- NULL
+  # Load datasets from CSV files
+  ratings <- read.csv("ratings.csv")
+  details <- read.csv("details.csv")
+  
+  cat("Datasets have been loaded from existing CSV files.\n\n")
 }
-                
-knitr::kable(head(song_data,n=4),
-             format = "html",
-             caption = "Most popular tracks on the third week of October in 2023")
 ```
-
-# Introduction
-
-## Background
-Provide an overview of your journey in academia and your decision to transition to board game design. Introduce the concept of "Academia: The Board Game" and the main goal of creating a profitable game.
-
-## Objectives
-Outline the main objectives of the report:
-1. Prepare and describe the data.
-2. Analyze the important game design variables.
-3. Lay out a strategy recommendation.
 
 # Data Preparation and Description
 
 ## Data Source
-Describe the BoardGameGeeks data obtained from TidyTuesday. Mention the types of information available (e.g., game ratings, mechanics, themes, user reviews).
+
+The data source pertains to BoardGameGeek Reviews and is composed of two datasets. The first dataset contains details about various board games, and the second dataset includes reviews from users for these games, linked by an ID. All reviews are from users, and their comments are included.
+
+```{r}
+#| echo: false
+#| warning: false
+
+# Get the dimensions of the datasets
+ratings_dim <- dim(ratings)
+details_dim <- dim(details)
+
+# Print the number of rows and columns for each dataset separately
+cat("Ratings Dataset:\n")
+cat("Number of rows:", ratings_dim[1], "\n")
+cat("Number of columns:", ratings_dim[2], "\n\n")
+
+cat("Details Dataset:\n")
+cat("Number of observations:", details_dim[1], "\n")
+cat("Number of columns:", details_dim[2], "\n")
+
+```
+
+
+
+
+```{r}
+#| echo: false
+#| warning: false
+
+# Ratings Table
+ratings <- data.frame(
+  variable = c("num", "id", "name", "year", "rank", "average", "bayes_average", "users_rated", "url", "thumbnail"),
+  class = c("double", "double", "character", "double", "double", "double", "double", "double", "character", "character"),
+  description = c("Game number", "Game ID", "Game name", "Game year", "Game rank", "Average rating", "Bayes average rating", "Users rated", "Game url", "Game thumbnail")
+)
+
+# Details Table
+details <- data.frame(
+  variable = c("num", "id", "primary", "description", "yearpublished", "minplayers", "maxplayers", "playingtime", "minplaytime", "maxplaytime", "minage", 
+               "boardgamecategory", "boardgamemechanic", "boardgamefamily", "boardgameexpansion", "boardgameimplementation", "boardgamedesigner", 
+               "boardgameartist", "boardgamepublisher", "owned", "trading", "wanting", "wishing"),
+  class = c("double", "double", "character", "character", "double", "double", "double", "double", "double", "double", "double", 
+            "character", "character", "character", "character", "character", "character", "character", "character", "double", "double", "double", "double"),
+  description = c("Game number", "Game ID", "Primary name", "Description of game", "Year published", "Min n of players", "Max n of players", "Playing time in minutes", 
+                  "Min play time", "Max play time", "minimum age", "Category", "Mechanic", "Board game family", "Expansion", "Implementation", "Designer", 
+                  "Artist", "Publisher", "Num owned", "Num trading", "Num wanting", "Num wishing")
+)
+                
+
+knitr::kable(details,
+             format = "html",
+             caption = "Board game details dataset")
+
+knitr::kable(ratings,
+             format = "html",
+             caption = "Ratings dataset")
+
+
+
+```
+
 
 ## Data Preparation
 Detail the steps taken to clean and preprocess the data in R. Include code snippets where appropriate.
