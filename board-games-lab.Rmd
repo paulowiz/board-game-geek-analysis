@@ -324,17 +324,14 @@ category_distribution <- clean_data %>%
   arrange(desc(n))
 
 # Select the top 20 categories
-top20_category_distribution <- head(category_distribution, 30)
+top_category_distribution <- head(category_distribution, 40)
 
-# Plot the distribution of all categories
-ggplot(category_distribution, aes(x = reorder(boardgamecategory, -n), y = n, fill = n)) +
-  geom_bar(stat = "identity") +
-  scale_fill_gradient(low = "lightblue", high = "darkblue") +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = 8), 
-        plot.title = element_text(size = 14, face = "bold"),
-        axis.title = element_text(size = 12),
-        axis.text = element_text(size = 10)) +
-  labs(title = "Distribution of Board Game Categories", x = "Category", y = "Frequency") +
-  coord_flip()
+print(category_distribution)
+
+# Plot the distribution
+ggplot(top_category_distribution, aes(x = reorder(boardgamecategory, -n), y = n)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(title = "Distribution of Board Game Categories Top 40 from 84 categories", x = "Category", y = "Frequency")
 
 ````

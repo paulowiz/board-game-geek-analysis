@@ -1,6 +1,6 @@
 ---
-title: "Academia to Board Game Brilliance - A Data-Driven Strategy for 'Academia: The Board Game"
-author: "Paulo Henrique da Silva Mota"
+title: "Analyzing Board Game Ratings - Insights from User Engagement and Game Features"
+author: "Paulo Henrique da Silva Mota | SNR 2134751"
 format: 
     pdf:
       toc: true
@@ -14,8 +14,8 @@ header-includes:
   - \usepackage{tikz}
   - \AtBeginDocument{\thispagestyle{empty}\begin{tikzpicture}[remember picture,overlay]
           \node at (current page.south) [yshift=6cm] {\includegraphics[width=0.25\paperwidth,height=0.25\paperheight,keepaspectratio]{logo.png}};
-          \node at (current page.center) [yshift=5cm] [anchor=north,yshift=-2cm] {\Huge\textbf{Academia to Board Game Brilliance}};
-          \node at (current page.center) [yshift=3cm] [anchor=north,yshift=-2cm] {\huge\textbf{A Data-Driven Strategy for Academia The Board Game}};
+          \node at (current page.center) [yshift=5cm] [anchor=north,yshift=-2cm] {\Huge\textbf{Analyzing Board Game Ratings}};
+          \node at (current page.center) [yshift=3cm] [anchor=north,yshift=-2cm] {\huge\textbf{Insights from User Engagement and Game Features}};
           \node at (current page.south) [yshift=5cm] [anchor=north,yshift=-2cm] {\normalsize\textbf{June 2024}};
           \end{tikzpicture}\clearpage}
 editor: visual
@@ -25,7 +25,6 @@ editor: visual
 #| echo: false
 #| warning: false
 library(tidytuesdayR)
-# Load the required library
 library(httr)
 library(dplyr)
 
@@ -88,10 +87,9 @@ library(stringr)
 ratings_dim <- dim(ratings)
 details_dim <- dim(details)
 
-# Assuming ratings and details datasets are already available in the environment
 
-# Join datasets on 'id' using dplyr
-# Merge datasets on 'num' and 'id'
+
+# Merge datasets on 'id' and 'id'
 merged_data <- merge(ratings, details, by = c("id", "id"))
 
 merged_data <- merged_data %>%
@@ -162,7 +160,7 @@ knitr::kable(ratings_data,
 
 
 ```
-Here are some trends about the boarding games:
+The first columns that catches my attention was the number of ratings and the rating average values, and I decided to make a trend to compare which other to see the results of the rating score changes if we have different number of ratings.
 
 ```{r}
 #| echo: false
@@ -231,7 +229,7 @@ In order to have a better dataset to make our analysis, first I merged details w
 
 ## Performance Measures
 
-In the context of profitability within a board game, two critical performance metrics stand out: the average rating, denoted by the 'average' column, as higher ratings typically signify superior market reception; and the number of reviews, captured by the 'users_rated' variable, as a greater volume of reviews tends to correlate with increased sales and heightened popularity.
+In the context of profitability within a board game, two critical performance metrics stand out: the average rating, represented by the 'average' column, as higher ratings typically signify superior market reception; and the number of reviews, captured by the 'users_rated' variable, as a greater volume of reviews tends to correlate with increased sales and heightened popularity.
 
 The charts below illustrate the distribution of the performance metrics:
 
@@ -288,12 +286,12 @@ print(plot_avg_users_rated)
 
 The variables influencing game design decisions within our dataset are closely intertwined with the intrinsic traits of board games. These variables encompass Category and Mechanic where specific genres may demonstrate stronger financial performance, and Play Time, which profoundly shape a game's attractiveness to potential audiences. Moreover, MaxPlayers act as indicators of the potential player base, potentially aligning with increased review counts. 
 
-In addition to these variables, it's crucial to consider certain control variables to ensure a comprehensive analysis. Control variables such as Year of Release, denoted by "Year Published," are vital as newer games may experience different market dynamics compared to older ones. Moreover, factors like Artist, Designer, and Publisher reputation play significant roles and could impact the outcomes of success, warranting their inclusion in the analysis for a more nuanced understanding of performance metrics within the board game industry.
+In addition to these variables, it's crucial to consider certain control variables to ensure a comprehensive analysis. Control variables such as Year of Release, represented by "Year Published," are vital as newer games may experience different market dynamics compared to older ones. However, factors like Artist, Designer, and Publisher reputation play significant roles and could impact the outcomes of success.
 
 
 ## Data Summary
 
-The chart below you can see the distribution form the categorical values and relaize that the top categories may have the best probability to be more sucessfull, for being high trended in the data. The same reason is applied to the mechanic.
+The chart below you can see the distribution form the categorical values and relaize that the top categories may have the best probability to be more sucessfull, for being high trended in the data. The same reason is applied to the board game mechanic.
 
 ```{r}
 #| echo: false
@@ -324,7 +322,7 @@ ggplot(top_category_distribution, aes(x = reorder(boardgamecategory, -n), y = n)
   labs(title = "Distribution of Board Game Categories Top 40", x = "Category", y = "Frequency")
 
 ```
-About the artist,desgin and plublishers, it is more about reputation, some new fame with the right names could end up sucessfull just because the best experience that those users had with a previous game. These people and companies become well now between the community with more credibility.
+About the artist,design and publishers, it is more about reputation, some new fame with the right names could end up successful just because the best experience that those users had with a previous game. These people and companies become well now between the community with more credibility.
 
 ```{r}
 #| echo: false
@@ -359,7 +357,7 @@ ggplot(top_artistis_distribution, aes(x = reorder(boardgameartist, -n), y = n)) 
 
 ## Relationships with Performance Measures
 
-Analyzing the correlation was my initial step in identifying potential variables to include in my linear regression model. This analysis helps to determine the relationships between the measured variables. We observed that the variables "owned," "wishing," and "wanted" are highly correlated with our measured variables. This suggests that by increasing the average rating and the number of user reviews, we can potentially enhance the profitability of a board game.
+Analyzing the correlation was my initial step in identifying potential variables to include in my linear regression model. This analysis helps to determine the relationships between the measured variables. We observed that the variables "owned," "wishing," and "wanted" are highly correlated with our measured variables. This suggests that by increasing the average rating and the number of user reviews, we can potentially improve the profitability of a board game.
 
 
 ```{r}
@@ -391,6 +389,7 @@ heatmap <- ggplot(melted_corr_matrix, aes(x = Var1, y = Var2, fill = value)) +
 # Display the heatmap
 print(heatmap)
 ```
+## Modeling and Evaluation
 ```{r}
 #| echo: false
 #| warning: false
@@ -398,17 +397,6 @@ print(heatmap)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
-
-# Assume the datasets are already loaded and merged as `merged_data`
-# Here is an example merge assuming 'game_id' is the common identifier
-# merged_data <- merge(ratings, details, by = "game_id")
-# Load necessary libraries
-library(dplyr)
-library(tidyr)
-library(ggplot2)
-
-# Load the datasets (assuming they are already loaded and merged as merged_data)
-# merged_data <- merge(ratings, details, by = "game_id")
 
 # Clean and split the categorical variables
 clean_data <- merged_data %>%
@@ -443,35 +431,85 @@ model <- lm(average ~ users_rated + maxplayers + playingtime + yearpublished +
 summary(model)
 
 ```
+```{r}
+#| echo: false
+#| warning: false
 
-## Model Evaluation
+library(dplyr)
+library(ggplot2)
+library(broom)
 
-Discuss the appropriateness of the model based on R output. Explore other methods to test the relationships (e.g., ANOVA, correlation analysis).
+# Sample 10% of the dataset
+set.seed(123) # For reproducibility
+sampled_data <- clean_data %>% sample_frac(0.1)
 
-## Causality Discussion
+# Fit linear regression model on the sampled data
+linear_model <- lm(average ~ users_rated + maxplayers + playingtime + yearpublished +
+                    boardgamecategory + boardgamemechanic + boardgameartist + boardgamepublisher + boardgamedesigner,
+                    data = sampled_data)
 
-Examine the potential for causal inference in the dataset. Discuss limitations and assumptions.
+# Create a scatter plot with a trend line
+scatter_plot <- ggplot(sampled_data, aes(x = users_rated, y = average)) +
+  geom_point(alpha = 0.3) +
+ geom_smooth(method = "lm", se = TRUE, col = "blue", formula = y ~ x) +
+  labs(title = "Scatter Plot of Users Rated vs Average Rating (Sampled Data)",
+       x = "Number of Users Rated",
+       y = "Average Rating")
+
+# Display the scatter plot
+print(scatter_plot)
+
+```
+
+The call shows the command that I used to train my linear regression and below we can see different results and metrics from this object.
+
+The linear regression model you've fitted to predict the average rating of board games based on various features such as the number of users who rated the game, maximum number of players, playing time, year published, and categorical variables including board game category, mechanic, artist, publisher, and designer. The coefficients indicate the estimated change in the average rating for a one-unit increase in each predictor variable, holding other variables constant. For instance, the positive coefficient for users rated suggests that as the number of users who rated a game increases by one, the average rating tends to increase by approximately 0.000027, all else being equal. Similarly, the negative coefficient for max players indicates that, on average, games with more maximum players tend to have slightly lower ratings.
+
+The diagnostic results at the bottom provide insights into the overall performance and assumptions of the model. The residual standard error indicates the average amount by which the observed values deviate from the predicted values, providing a measure of the model's accuracy. The multiple R-squared value of 0.507 indicates that the model explains approximately 50.7% of the variability in the average ratings, suggesting moderate predictive power. The F-statistic tests the overall significance of the model, with a very low p-value indicating that at least one of the predictor variables is significantly related to the average rating. Overall, the model appears to be statistically significant and explains a substantial portion of the variability in average ratings, but further exploration and refinement may be beneficial.
 
 ## Results Presentation
 
-Provide a single result table and a figure to present the analysis findings.
+```{r}
+#| echo: false
+#| warning: false
+# Fit linear regression model
+linear_model <- lm(average ~ ., data = clean_data)
 
+# Extract coefficients
+coef_values <- coef(linear_model)[-1] # Exclude intercept
+coef_names <- names(coef_values)
+coef_df <- data.frame(variable = coef_names, coefficient = coef_values)
+
+# Plot coefficients
+ggplot(coef_df, aes(x = reorder(variable, coefficient), y = coefficient)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  coord_flip() +
+  labs(title = "Linear Regression Coefficients",
+       x = "Variable",
+       y = "Coefficient")
+
+```
 # Strategy Recommendation
 
-Strategic Insights Build on the analysis to provide strategic recommendations for the game design.
+Based on the analysis, several factors significantly influence the average rating of board games. The number of users who rated the game, the year published, and specific categorical attributes like the game category, mechanics, and designer have substantial impacts. Therefore, focusing on increasing user engagement and incorporating popular game mechanics and categories can be beneficial. Designing games that cater to current trends and involving renowned designers can also enhance the game's appeal and improve ratings. To create a successful and profitable board game, it is essential to encourage more players to rate the game by enhancing user experience, promoting active participation, and implementing effective marketing strategies.
+
+Additionally, developing games that align with popular categories and mechanics can attract a broader audience, and engaging well-known designers can boost the game's credibility and attractiveness. Staying updated with industry trends and adjusting game elements to match the preferences of contemporary players is also crucial.
 
 ## Limitations
 
-Discuss the limitations of the analysis and recommendations.
+The analysis has certain limitations.The linear regression model simplifies complex relationships and may not capture non-linear interactions or other intricate patterns in the data. Furthermore, the model only includes a specific set of variables and may not account for other important factors influencing game ratings, such as marketing efforts, social media presence, or community engagement.Finally, all data is generated by users and could be bias to our analysis.
 
 ## Additional Data and Analysis
 
-Suggest additional data that could further inform the strategy and potential analyses that could be conducted with it.
+To further inform the strategy and enhance the analysis, including marketing and social media data could provide deeper insights into the impact of marketing campaigns and social media interactions on game ratings. Collecting data on user demographics and feedback can help to build  games to specific target audiences and improve user satisfaction. In addition, analyzing data on competitors' games and their performance can offer valuable strategic insights. Exploring non-linear models and interaction terms can also help capture more complex relationships and improve predictive accuracy.
 
 ## Conclusion
 
-Summarize the key findings and strategic recommendations. Reinforce the goal of creating a successful and profitable board game.
+The key findings highlight the importance of user engagement, game categories, mechanics, and designer reputation in determining the average rating of board games. By focusing on these aspects and incorporating additional data, game developers can design successful and profitable board games. Despite the limitations, this analysis provides a strong foundation for strategic decision-making in game design.
 
 # References
 
-List all sources and references used in the report.
+[1] ‘How to Create Your First Board Game | Bits + Pieces’, BoardGameGeek. Accessed: Jun. 09, 2024. [Online]. Available: https://boardgamegeek.com/blogpost/96723/how-to-create-your-first-board-game
+
+[1] ‘Browse Board Games | BoardGameGeek’. Accessed: Jun. 09, 2024. [Online]. Available: https://boardgamegeek.com/browse/boardgame
+
