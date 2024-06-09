@@ -40,23 +40,34 @@ if (!file.exists("ratings.csv") | !file.exists("details.csv")) {
   # Assign the datasets to variables
   ratings <- tuesdata$ratings
   details <- tuesdata$details
-  
   # Check if the data frames are empty
   if (nrow(ratings) == 0 | nrow(details) == 0) {
-    cat("Error: One or both datasets are empty. Cannot export.\n")
+    #print("Error: One or both datasets are empty. Cannot export.\n")
   } else {
     # Export the datasets as CSV files
     write.csv(ratings, "ratings.csv", row.names = FALSE)
     write.csv(details, "details.csv", row.names = FALSE)
     
-    cat("Datasets have been loaded from tidytuesdayR and exported as 'ratings.csv' and 'details.csv'.\n\n")
+   # print("Datasets have been loaded from tidytuesdayR and exported as 'ratings.csv' and 'details.csv'.\n\n")
   }
 } else {
   # Load datasets from CSV files
   ratings <- read.csv("ratings.csv")
   details <- read.csv("details.csv")
   
-  cat("Datasets have been loaded from existing CSV files.\n\n")
+  #print("Datasets have been loaded from existing CSV files.\n\n")
+}
+
+# Function to identify categorical and numerical columns
+split_columns <- function(data) {
+  # Identify categorical columns (assumed to be of type factor or character)
+  cat_cols <- names(Filter(function(x) is.factor(x) || is.character(x), data))
+  
+  # Identify numerical columns (assumed to be of type numeric or integer)
+  num_cols <- names(Filter(function(x) is.numeric(x) || is.integer(x), data))
+  
+  return(list(categorical = cat_cols, numerical = num_cols))
+  
 }
 ```
 
@@ -69,15 +80,30 @@ The data source pertains to BoardGameGeek Reviews and is composed of two dataset
 ```{r}
 #| echo: false
 #| warning: false
+library(dplyr)
+library(ggplot2)
+library(stringr)
 
 # Get the dimensions of the datasets
 ratings_dim <- dim(ratings)
 details_dim <- dim(details)
 
-# Print the number of rows and columns for each dataset separately
-cat("Ratings Dataset:\n")
-cat("Number of rows:", ratings_dim[1], "\n")
-cat("Number of columns:", ratings_dim[2], "\n\n")
+# Assuming ratings and details datasets are already available in the environment
+
+# Join datasets on 'id' using dplyr
+# Merge datasets on 'num' and 'id'
+merged_data <- merge(ratings, details, by = c("id", "id"))
+
+merged_data <- merged_data %>%
+  filter(yearpublished > 0)
+
+# Remove redundant columns if necessary
+merged_data <- merged_data %>%
+  select(-contains(".x"), -contains(".y"))
+
+# Remove redundant columns if they exist
+# Since we don't need 'num.x' and 'num.y', we drop them after merging
+merged_data <- merged_data %>% select(-contains(".x"), -contains(".y"))
 
 cat("Details Dataset:\n")
 cat("Number of observations:", details_dim[1], "\n")
@@ -85,22 +111,14 @@ cat("Number of columns:", details_dim[2], "\n")
 
 ```
 
-
-
+The Board detail dataset contains information about many board games, where which obeservation represent a board game.
 
 ```{r}
 #| echo: false
 #| warning: false
 
-# Ratings Table
-ratings <- data.frame(
-  variable = c("num", "id", "name", "year", "rank", "average", "bayes_average", "users_rated", "url", "thumbnail"),
-  class = c("double", "double", "character", "double", "double", "double", "double", "double", "character", "character"),
-  description = c("Game number", "Game ID", "Game name", "Game year", "Game rank", "Average rating", "Bayes average rating", "Users rated", "Game url", "Game thumbnail")
-)
-
 # Details Table
-details <- data.frame(
+details_data <- data.frame(
   variable = c("num", "id", "primary", "description", "yearpublished", "minplayers", "maxplayers", "playingtime", "minplaytime", "maxplaytime", "minage", 
                "boardgamecategory", "boardgamemechanic", "boardgamefamily", "boardgameexpansion", "boardgameimplementation", "boardgamedesigner", 
                "boardgameartist", "boardgamepublisher", "owned", "trading", "wanting", "wishing"),
@@ -112,61 +130,348 @@ details <- data.frame(
 )
                 
 
-knitr::kable(details,
+knitr::kable(details_data,
              format = "html",
              caption = "Board game details dataset")
 
-knitr::kable(ratings,
+
+```
+
+
+
+```{r}
+#| echo: false
+#| warning: false
+# Print the number of rows and columns for each dataset separately
+
+# Ratings Table
+ratings_data <- data.frame(
+  variable = c("num", "id", "name", "year", "rank", "average", "bayes_average", "users_rated", "url", "thumbnail"),
+  class = c("double", "double", "character", "double", "double", "double", "double", "double", "character", "character"),
+  description = c("Game number", "Game ID", "Game name", "Game year", "Game rank", "Average rating", "Bayes average rating", "Users rated", "Game url", "Game thumbnail")
+)
+
+cat("Ratings Dataset:\n")
+cat("Number of rows:", ratings_dim[1], "\n")
+cat("Number of columns:", ratings_dim[2], "\n\n")
+
+knitr::kable(ratings_data,
              format = "html",
              caption = "Ratings dataset")
 
 
 
 ```
+Here are some trends about the boarding games:
 
+```{r}
+#| echo: false
+#| warning: false
+# Number of ratings per board game
+num_ratings_per_game <- merged_data %>%
+  select(name, users_rated) %>%
+  arrange(desc(users_rated))
+
+# Number of ratings per board game with average rating
+num_ratings_per_game <- merged_data %>%
+  select(name, users_rated, average) %>%
+  arrange(desc(users_rated))
+
+# Plot the number of ratings per game (top 20 for readability) with average ratings
+plot_ratings_per_game <- ggplot(head(num_ratings_per_game, 20), aes(x = reorder(name, average), y = users_rated)) +
+  geom_col(fill = "darkgreen") +
+  geom_text(aes(label = round(average, 2)), hjust = -0.2, color = "black", size = 3.5) +
+  labs(title = "Top 20 Board Games by Average Rating",
+       x = "Board Game",
+       y = "Number of Ratings") +
+  theme_minimal() +
+  coord_flip()  # Flip coordinates for better readability
+
+# Print the plot
+print(plot_ratings_per_game)
+
+```
+
+
+```{r}
+#| echo: false
+#| warning: false
+# Number of ratings per board game
+num_ratings_per_game <- merged_data %>%
+  select(name, users_rated) %>%
+  arrange(desc(users_rated))
+
+# Number of ratings per board game with average rating
+num_ratings_per_game <- merged_data %>%
+  select(name, users_rated, average) %>%
+  arrange(desc(users_rated))
+
+# Plot the number of ratings per game (top 20 for readability) with average ratings
+plot_ratings_per_game <- ggplot(head(num_ratings_per_game, 20), aes(x = reorder(name, users_rated), y = users_rated)) +
+  geom_col(fill = "darkblue") +
+  geom_text(aes(label = round(average, 2)), hjust = -0.2, color = "black", size = 3.5) +
+  labs(title = "Top 20 Board Games by Number of Ratings",
+       x = "Board Game",
+       y = "Number of Ratings") +
+  theme_minimal() +
+  coord_flip()  # Flip coordinates for better readability
+
+# Print the plot
+print(plot_ratings_per_game)
+
+# Save the plot to a file with increased width
+ggsave("plot_ratings_per_game.png", plot = plot_ratings_per_game, width = 12, height = 8)
+```
 
 ## Data Preparation
+
 Detail the steps taken to clean and preprocess the data in R. Include code snippets where appropriate.
 
+In order to have a better dataset to make our analysis, first I merged details with ratings by the column ID, following the instructions in the dataset documentation, with my dataset merged I will remove all games with no ratings information. After that I pliot the correlation matrix to identify possibly correlation with my variables.
+
 ## Performance Measures
-Discuss two performance measures (e.g., average rating, number of ratings) and their relevance to the goal of making money.
+
+In the context of profitability within a board game, two critical performance metrics stand out: the average rating, denoted by the 'average' column, as higher ratings typically signify superior market reception; and the number of reviews, captured by the 'users_rated' variable, as a greater volume of reviews tends to correlate with increased sales and heightened popularity.
+
+The charts below illustrate the distribution of the performance metrics:
+
+
+```{r}
+#| echo: false
+#| warning: false
+# Load necessary libraries
+library(dplyr)
+library(ggplot2)
+library(stringr)
+# Assuming ratings and details datasets are already available in the environment
+
+# Join datasets on 'id' using dplyr
+# Merge datasets on 'num' and 'id'
+merged_data <- merge(ratings, details, by = c("id", "id"))
+
+merged_data <- merged_data %>%
+  filter(yearpublished > 0)
+
+# Remove redundant columns if necessary
+merged_data <- merged_data %>%
+  select(-contains(".x"), -contains(".y"))
+
+# Remove redundant columns if they exist
+# Since we don't need 'num.x' and 'num.y', we drop them after merging
+merged_data <- merged_data %>% select(-contains(".x"), -contains(".y"))
+
+# Plot 1: Distribution of average ratings
+plot_avg_rating <- ggplot(merged_data, aes(x = average)) +
+  geom_histogram(binwidth = 0.1, fill = "blue", color = "black") +
+  labs(title = "Distribution of Average Ratings",
+       x = "Average Rating",
+       y = "Frequency") +
+  theme_minimal()
+
+# Plot 2: Average rating vs. number of users who rated
+plot_avg_users_rated <- ggplot(merged_data, aes(x = users_rated, y = average)) +
+  geom_point(alpha = 0.5, color= "darkblue") +
+  labs(title = "Average Rating vs. Number of Users Rated",
+       x = "Number of Users Rated",
+       y = "Average Rating") +
+  theme_minimal() +
+  scale_x_log10(labels = scales::trans_format("log10", scales::math_format(10^.x))) 
+  #scale_x_log10()  # log scale for better visualization
+
+
+# Print the plots
+print(plot_avg_rating)
+print(plot_avg_users_rated)
+```
 
 ## Key Variables
-Identify and describe three to four key variables that could inform game design actions (e.g., mechanics, play time, number of players).
 
-## Control Variables
-Identify variables that might affect game performance but are not part of the strategy options (e.g., year published, game category).
+The variables influencing game design decisions within our dataset are closely intertwined with the intrinsic traits of board games. These variables encompass Category and Mechanic where specific genres may demonstrate stronger financial performance, and Play Time, which profoundly shape a game's attractiveness to potential audiences. Moreover, MaxPlayers act as indicators of the potential player base, potentially aligning with increased review counts. 
+
+In addition to these variables, it's crucial to consider certain control variables to ensure a comprehensive analysis. Control variables such as Year of Release, denoted by "Year Published," are vital as newer games may experience different market dynamics compared to older ones. Moreover, factors like Artist, Designer, and Publisher reputation play significant roles and could impact the outcomes of success, warranting their inclusion in the analysis for a more nuanced understanding of performance metrics within the board game industry.
+
 
 ## Data Summary
-Provide a table and a figure summarizing the frequency and distributions of relevant variables.
 
+The chart below you can see the distribution form the categorical values and relaize that the top categories may have the best probability to be more sucessfull, for being high trended in the data. The same reason is applied to the mechanic.
+
+```{r}
+#| echo: false
+#| warning: false
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+
+# Clean and split the categories
+clean_data <- merged_data %>%
+  mutate(boardgamecategory = gsub("\\[|\\]|'", "", boardgamecategory)) %>%
+  separate_rows(boardgamecategory, sep = ", ") %>%
+  filter(boardgamecategory != "")
+
+# Count the occurrences of each category
+category_distribution <- clean_data %>%
+  count(boardgamecategory) %>%
+  arrange(desc(n))
+
+# Select the top 20 categories
+top_category_distribution <- head(category_distribution, 40)
+
+# Plot the distribution
+ggplot(top_category_distribution, aes(x = reorder(boardgamecategory, -n), y = n)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(title = "Distribution of Board Game Categories Top 40", x = "Category", y = "Frequency")
+
+```
+About the artist,desgin and plublishers, it is more about reputation, some new fame with the right names could end up sucessfull just because the best experience that those users had with a previous game. These people and companies become well now between the community with more credibility.
+
+```{r}
+#| echo: false
+#| warning: false
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+
+# Clean and split the categories
+clean_data <- merged_data %>%
+  mutate(boardgameartist = gsub("\\[|\\]|'", "", boardgameartist)) %>%
+  separate_rows(boardgameartist, sep = ", ") %>%
+  filter(boardgameartist != "")
+
+# Count the occurrences of each category
+artists_distribution <- clean_data %>%
+  count(boardgameartist) %>%
+  arrange(desc(n))
+
+# Select the top 20 categories
+top_artistis_distribution <- head(artists_distribution, 20)
+
+# Plot the distribution
+ggplot(top_artistis_distribution, aes(x = reorder(boardgameartist, -n), y = n)) +
+  geom_bar(stat = "identity", fill = "purple") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(title = "Distribution of Board Game Artists Top 20 from 10961 artistis", x = "Artist", y = "Frequency")
+
+```
 # Data Analysis
 
 ## Relationships with Performance Measures
-Analyze how key design variables relate to performance measures using appropriate statistical methods.
+
+Analyzing the correlation was my initial step in identifying potential variables to include in my linear regression model. This analysis helps to determine the relationships between the measured variables. We observed that the variables "owned," "wishing," and "wanted" are highly correlated with our measured variables. This suggests that by increasing the average rating and the number of user reviews, we can potentially enhance the profitability of a board game.
+
+
+```{r}
+#| echo: false
+#| warning: false
+# Load necessary libraries
+library(ggplot2)
+library(reshape2)
+# Select only numeric columns
+numeric_data <- merged_data %>% select(where(is.numeric))
+
+# Calculate the correlation matrix
+correlation_matrix <- cor(numeric_data)
+# Melt the correlation matrix into a long format
+melted_corr_matrix <- melt(correlation_matrix)
+
+# Create the correlation heatmap with annotations
+heatmap <- ggplot(melted_corr_matrix, aes(x = Var1, y = Var2, fill = value)) +
+    geom_tile(color = "white") +
+    scale_fill_gradient2(low = "red", high = "green", mid = "lightyellow",
+                         midpoint = 0, limit = c(-1, 1), space = "Lab",
+                         name = "Correlation") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
+    labs(title = "Correlation Heatmap",
+         x = "Variables",
+         y = "Variables")
+
+# Display the heatmap
+print(heatmap)
+```
+```{r}
+#| echo: false
+#| warning: false
+# Load necessary libraries
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+# Assume the datasets are already loaded and merged as `merged_data`
+# Here is an example merge assuming 'game_id' is the common identifier
+# merged_data <- merge(ratings, details, by = "game_id")
+# Load necessary libraries
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+# Load the datasets (assuming they are already loaded and merged as merged_data)
+# merged_data <- merge(ratings, details, by = "game_id")
+
+# Clean and split the categorical variables
+clean_data <- merged_data %>%
+  mutate(boardgamecategory = gsub("\\[|\\]|'", "", boardgamecategory),
+         boardgamemechanic = gsub("\\[|\\]|'", "", boardgamemechanic),
+         boardgameartist = gsub("\\[|\\]|'", "", boardgameartist),
+         boardgamepublisher = gsub("\\[|\\]|'", "", boardgamepublisher),
+         boardgamedesigner = gsub("\\[|\\]|'", "", boardgamedesigner)) %>%
+  separate_rows(boardgamecategory, sep = ", ") %>%
+  separate_rows(boardgamemechanic, sep = ", ") %>%
+  separate_rows(boardgameartist, sep = ", ") %>%
+  separate_rows(boardgamepublisher, sep = ", ") %>%
+  separate_rows(boardgamedesigner, sep = ", ") %>%
+  mutate(boardgamecategory = factor(boardgamecategory),
+         boardgamemechanic = factor(boardgamemechanic),
+         boardgameartist = factor(boardgameartist),
+         boardgamepublisher = factor(boardgamepublisher),
+         boardgamedesigner = factor(boardgamedesigner)) %>%
+  select(average, users_rated, maxplayers, playingtime, yearpublished, 
+         boardgamecategory, boardgamemechanic, boardgameartist, boardgamepublisher, boardgamedesigner)
+
+# Create dummy variables for categorical columns
+clean_data <- clean_data %>%
+  mutate(across(where(is.factor), ~ as.numeric(as.factor(.))))
+
+# Fit the linear regression model
+model <- lm(average ~ users_rated + maxplayers + playingtime + yearpublished +
+              boardgamecategory + boardgamemechanic + boardgameartist + boardgamepublisher + boardgamedesigner,
+            data = clean_data)
+
+# Summary of the model
+summary(model)
+
+```
 
 ## Model Evaluation
+
 Discuss the appropriateness of the model based on R output. Explore other methods to test the relationships (e.g., ANOVA, correlation analysis).
 
 ## Causality Discussion
+
 Examine the potential for causal inference in the dataset. Discuss limitations and assumptions.
 
 ## Results Presentation
+
 Provide a single result table and a figure to present the analysis findings.
 
 # Strategy Recommendation
-Strategic Insights
-Build on the analysis to provide strategic recommendations for the game design.
+
+Strategic Insights Build on the analysis to provide strategic recommendations for the game design.
 
 ## Limitations
+
 Discuss the limitations of the analysis and recommendations.
 
 ## Additional Data and Analysis
+
 Suggest additional data that could further inform the strategy and potential analyses that could be conducted with it.
 
 ## Conclusion
+
 Summarize the key findings and strategic recommendations. Reinforce the goal of creating a successful and profitable board game.
 
 # References
-List all sources and references used in the report.
 
+List all sources and references used in the report.
