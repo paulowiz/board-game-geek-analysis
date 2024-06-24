@@ -16,9 +16,9 @@
     <img alt="Quarto" src="https://quarto.org/quarto.png">
     <br />
     <br />
-    <a href="https://github.com/paulowiz/disaster_response_pipeline/issues">Report Bug</a>
+    <a href="https://github.com/paulowiz/board-game-geek-analysis/issues">Report Bug</a>
     ·
-    <a href="https://github.com/paulowiz/disaster_response_pipeline/issues">Request Feature</a>
+    <a href="https://github.com/paulowiz/board-game-geek-analysis/issues">Request Feature</a>
   </p>
 </p>
 
@@ -26,7 +26,7 @@
 
 <!-- ABOUT THE PROJECT -->
 ## 🤔 Introduction
-Streaming music platforms are really popular nowadays, users who is looking for their favoritessongs to listen in routine activities during the day like work, relax, party, working out, etc. Inother hand, singers using the same platform to share and promote new songs in order to risethe popularity and profits.  Overall, it is a high demand platform with a lots of informationabout songs, singers and users data.
+Streaming music platforms are prevalent nowadays, users who are looking for their favorite to listen in routine activities during the day like work, relax, party, working out, etc. Conversely, singers use the same platform to share and promote new songs to increase popularity and profits.  Overall, it is a high-demand platform with much information about songs, singers, and user data.
 
 
 
